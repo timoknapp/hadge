@@ -33,6 +33,7 @@ class WorkoutViewController: EntireTableViewController {
         buildSections()
         loadStatusView()
         loadExtraData()
+        autoExportWorkoutDetails()
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -303,6 +304,20 @@ class WorkoutViewController: EntireTableViewController {
             } else {
                 self.exportButton.image = UIImage(systemName: "plus.app")
             }
+        }
+    }
+
+    func autoExportWorkoutDetails(completionHandler: @escaping () -> Void = {}) {
+        guard UserDefaults.standard.bool(forKey: "autoExportEnabled") else { completionHandler(); return }
+
+        if !exportSemaphore {
+            exportSemaphore = true
+            updateStatus(string: "Processing workout details...")
+            (exportDistances || exportSteps || exportHeartRate || exportLocations || finishExport) {
+                completionHandler()
+            }
+        } else {
+            completionHandler()
         }
     }
 }
