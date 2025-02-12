@@ -37,6 +37,7 @@ class SettingsViewController: EntireTableViewController {
     var debugHelper = SettingsDebugHelper()
     var aboutHelper = SettingsAboutHelper()
     var syncHelper = SettingsSyncHelper()
+    var autoExportHelper = SettingsAutoExportHelper()
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -73,13 +74,7 @@ class SettingsViewController: EntireTableViewController {
         case .sync:
             return syncHelper.tableView(tableView, cellForRow: indexPath.row)
         case .autoExport:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "SettingsCell") ?? UITableViewCell(style: .default, reuseIdentifier: "SettingsCell")
-            cell.textLabel?.text = "Enable Auto Export"
-            let autoExportSwitch = UISwitch()
-            autoExportSwitch.isOn = UserDefaults.standard.bool(forKey: "autoExportEnabled")
-            autoExportSwitch.addTarget(self, action: #selector(toggleAutoExport(_:)), for: .valueChanged)
-            cell.accessoryView = autoExportSwitch
-            return cell
+            return autoExportHelper.tableView(tableView, cellForRow: indexPath.row)
         case .about:
             return aboutHelper.tableView(tableView, cellForRow: indexPath.row)
         case .debug:
@@ -98,7 +93,7 @@ class SettingsViewController: EntireTableViewController {
         case .sync:
             syncHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .autoExport:
-            break
+            autoExportHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .about:
             aboutHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .debug:
