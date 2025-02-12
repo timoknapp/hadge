@@ -109,7 +109,7 @@ class BackgroundTaskHelper {
         self.task = task
         self.stopped = false
         if isSignedIn() && UIApplication.shared.isProtectedDataAvailable {
-            (self.collectWorkoutData || self.collectActivityData || self.collectDistanceData || self.collectWorkoutDetailData || self.finishExport || self.finishBackgroundTask) { }
+            (self.collectWorkoutData || self.collectActivityData || self.collectDistanceData || self.finishExport || self.finishBackgroundTask) { }
         } else {
             self.finishBackgroundTask { }
         }
@@ -118,7 +118,7 @@ class BackgroundTaskHelper {
     func handleForegroundFetch() {
         self.stopped = false
         if isSignedIn() {
-            (self.collectWorkoutData || self.collectActivityData || self.collectDistanceData || self.collectWorkoutDetailData || self.finishExport) { }
+            (self.collectWorkoutData || self.collectActivityData || self.collectDistanceData || self.finishExport) { }
         }
     }
 
@@ -132,11 +132,29 @@ class BackgroundTaskHelper {
                 let filename = "workouts/\(Health.shared().year).csv"
                 GitHub.shared().updateFile(path: filename, content: content, message: "Update workouts") { _ in
                     Health.shared().markLastWorkout(workouts: workouts)
-                    completionHandler()
+                    self.autoExportWorkoutDetails(workouts: workouts, completionHandler: completionHandler)
                 }
             } else {
                 completionHandler()
             }
+        }
+    }
+
+    func autoExportWorkoutDetails(workouts: [HKWorkout], completionHandler: @escaping () -> Void) {
+        guard UserDefaults.standard.bool(forKey: "autoExportEnabled") else { completionHandler(); return }
+
+        let group = DispatchGroup()
+        for workout in workouts {
+            group.enter()
+            let workoutViewController = WorkoutViewController()
+            workoutViewController.workout = workout
+            workoutViewController.autoExportWorkoutDetails {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            completionHandler()
         }
     }
 
@@ -165,30 +183,6 @@ class BackgroundTaskHelper {
             let filename = "distances/\(Health.shared().year).csv"
             GitHub.shared().updateFile(path: filename, content: content, message: "Update distances") { _ in
                 Health.shared().markLastDistance(distances: distances!)
-                completionHandler()
-            }
-        }
-    }
-
-    func collectWorkoutDetailData(completionHandler: @escaping () -> Void) {
-        guard UserDefaults.standard.bool(forKey: "autoExportEnabled") else { completionHandler(); return }
-
-        Health.shared().getWorkouts { workouts in
-            guard let workouts = workouts, workouts.count > 0 else { completionHandler(); return }
-
-            let group = DispatchGroup()
-            for workout in workouts {
-                guard let workout = workout as? HKWorkout else { continue }
-
-                group.enter()
-                let workoutViewController = WorkoutViewController()
-                workoutViewController.workout = workout
-                workoutViewController.autoExportWorkoutDetails {
-                    group.leave()
-                }
-            }
-
-            group.notify(queue: .main) {
                 completionHandler()
             }
         }
