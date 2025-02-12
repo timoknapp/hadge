@@ -11,7 +11,7 @@ class UserDefaultKeys {
     static let lastSyncDate = "lastSyncDate"
     static let setupFinished = "setupFinished"
     static let workoutFilter = "workoutFilter"
-    static let autoExportEnabled = "autoExportEnabled" // Pf3df
+    static let autoExportEnabled = "autoExportEnabled"
 }
 
 enum InterfaceStyle: Int {
