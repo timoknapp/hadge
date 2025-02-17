@@ -11,6 +11,7 @@ class FilterViewController: EntireTableViewController {
     var preChecked = [UInt]()
     var selectAllValue = true
     var selectAllButton: UIButton?
+    var autoExportEnabled = false
 
     weak var delegate: FilterDelegate?
 
@@ -106,6 +107,11 @@ class FilterViewController: EntireTableViewController {
         }
 
         self.delegate?.onFilterSelected(workoutTypes: active)
+        UserDefaults.standard.set(autoExportEnabled, forKey: "autoExportEnabled")
         self.navigationController!.dismiss(animated: true)
+    }
+
+    @objc func toggleAutoExport(_ sender: UISwitch) {
+        autoExportEnabled = sender.isOn
     }
 }

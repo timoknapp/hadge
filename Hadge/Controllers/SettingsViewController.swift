@@ -26,6 +26,7 @@ private enum SettingsSections: Int, ReusableViewEnum {
     case account = 0
     case appearance
     case sync
+    case autoExport
     case about
     case debug
 }
@@ -36,6 +37,7 @@ class SettingsViewController: EntireTableViewController {
     var debugHelper = SettingsDebugHelper()
     var aboutHelper = SettingsAboutHelper()
     var syncHelper = SettingsSyncHelper()
+    var autoExportHelper = SettingsAutoExportHelper()
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -53,6 +55,8 @@ class SettingsViewController: EntireTableViewController {
             return 3
         case .sync:
             return 1
+        case .autoExport:
+            return 1
         case .about:
             return 1
         case .debug:
@@ -69,6 +73,8 @@ class SettingsViewController: EntireTableViewController {
             return appearanceHelper.tableView(tableView, cellForRow: indexPath.row)
         case .sync:
             return syncHelper.tableView(tableView, cellForRow: indexPath.row)
+        case .autoExport:
+            return autoExportHelper.tableView(tableView, cellForRow: indexPath.row)
         case .about:
             return aboutHelper.tableView(tableView, cellForRow: indexPath.row)
         case .debug:
@@ -86,6 +92,8 @@ class SettingsViewController: EntireTableViewController {
             appearanceHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .sync:
             syncHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
+        case .autoExport:
+            autoExportHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .about:
             aboutHelper.tableView(tableView, didSelectRow: indexPath.row, viewController: self)
         case .debug:
@@ -101,6 +109,8 @@ class SettingsViewController: EntireTableViewController {
             return "Appearance"
         case .sync:
             return "Sync"
+        case .autoExport:
+            return "Auto Export"
         case .about:
             return "About"
         case .debug:
@@ -116,6 +126,8 @@ class SettingsViewController: EntireTableViewController {
             return nil
         case .sync:
             return "This will re-upload all activity, distance, and workout data for all years with available data. You typically don't need to do this unless you deleted the repository or files in it."
+        case .autoExport:
+            return "Enable or disable automatic export of workout details."
         case .about:
             let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
             let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
@@ -138,6 +150,10 @@ class SettingsViewController: EntireTableViewController {
 
     @objc func didFinishUpload() {
         NotificationCenter.default.removeObserver(self, name: .didSetUpRepository, object: nil)
+    }
+
+    @objc func toggleAutoExport(_ sender: UISwitch) {
+        UserDefaults.standard.set(sender.isOn, forKey: "autoExportEnabled")
     }
 
     func debugOffset() -> Int {
